@@ -1,0 +1,14 @@
+# model weights (12–18 GB, both recipes) — download via install-*.ps1 or manual (see README)
+models/
+
+# ~181 MB llama.cpp binaries — download via install-*.ps1 or manual (see README)
+llama-cpp/
+
+# previous engine build backup — keep locally, never commit
+llama-cpp-b10621.bak/
+
+# logs
+*.log
+
+# personal/local notes — never committed (keep anything private here)
+local/
