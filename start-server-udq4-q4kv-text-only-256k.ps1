@@ -15,7 +15,7 @@ if ($existing) {
 
 Write-Host "Starting llama-server (UD-Q4_K_XL, text-only)..." -ForegroundColor Cyan
 Write-Host "  Model: $modelFile" -ForegroundColor Gray
-Write-Host "  Context: 256K, KV q4_0 symmetric, Flash Attention, all layers GPU, MTP spec n-max 3, ubatch 512, no reasoning preserve, reasoning effort medium, threads 6" -ForegroundColor Gray
+Write-Host "  Context: 256K, KV q4_0 symmetric, Flash Attention, all layers GPU, MTP spec n-max 3, ubatch 512, threads 6" -ForegroundColor Gray
 Write-Host "  Sampling (Qwen3.8-27B thinking mode): temp 1.0, top_p 0.95, top_k 20, min_p 0" -ForegroundColor Gray
 
 & $serverExe `
@@ -25,9 +25,8 @@ Write-Host "  Sampling (Qwen3.8-27B thinking mode): temp 1.0, top_p 0.95, top_k 
   --alias qwen3.8-27b --no-mmproj --parallel 1 `
   -ngl all -t 6 -ub 512 `
   --spec-type draft-mtp `
+  --spec-draft-n-max 3 `
   --spec-draft-poll 1 `
-  --no-reasoning-preserve `
-  --reasoning-effort medium `
   --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 `
   --presence-penalty 0.0 --repeat-penalty 1.0 `
-  --host 0.0.0.0 --port 8080
+  --host 0.0.0.0 --port 8080 -cram 6144

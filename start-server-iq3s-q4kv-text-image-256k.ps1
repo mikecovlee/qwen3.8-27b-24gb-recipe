@@ -30,8 +30,6 @@ Write-Host "  Context: 256K, KV q4_0 symmetric, Flash Attention, all layers GPU,
   --spec-type draft-mtp `
   --spec-draft-n-max 3 `
   --spec-draft-poll 1 `
-  --no-reasoning-preserve `
-  --reasoning-effort medium `
   --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 `
   --presence-penalty 0.0 --repeat-penalty 1.0 `
-  --host 0.0.0.0 --port 8080
+  --host 0.0.0.0 --port 8080 -cram 6144

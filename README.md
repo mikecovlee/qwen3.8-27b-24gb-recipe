@@ -93,7 +93,8 @@ Replace `<repo>` with the repository path.
 | Engine | llama.cpp b11491 (CUDA 13.4) |
 | API | `http://0.0.0.0:8080`, alias `qwen3.8-27b` |
 | Parallel slots | 1 (a single 256K slot; requests are serialized) |
-| Reasoning | server default `--reasoning-effort medium`; per-request `reasoning_effort` (`low`/`medium`/`high`/`xhigh`/`none`) and `reasoning_budget_tokens` are supported |
+| Reasoning | server default = the chat template default (effort `xhigh`, preserve-reasoning on); per-request `reasoning_effort` / `chat_template_kwargs` overrides are supported |
+| Host prompt cache | `-cram <MiB>` - host-RAM prompt cache cap (default 8192; 0 = off, -1 = unlimited; a cap, not a pre-allocation) |
 
 ### Recipe 1 — IQ3_S
 
@@ -105,7 +106,7 @@ Replace `<repo>` with the repository path.
 --alias qwen3.8-27b --parallel 1
 -ngl all -t 6 -ub 2048
 --spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-poll 1
---no-reasoning-preserve --reasoning-effort medium
+-cram 6144
 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --presence-penalty 0.0 --repeat-penalty 1.0
 --host 0.0.0.0 --port 8080
 ```
@@ -129,8 +130,8 @@ Replace `<repo>` with the repository path.
 --cache-type-k q4_0 --cache-type-v q4_0
 --alias qwen3.8-27b --no-mmproj --parallel 1
 -ngl all -t 6 -ub 512
---spec-type draft-mtp --spec-draft-poll 1
---no-reasoning-preserve --reasoning-effort medium
+--spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-poll 1
+-cram 6144
 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --presence-penalty 0.0 --repeat-penalty 1.0
 --host 0.0.0.0 --port 8080
 ```
@@ -155,7 +156,7 @@ Replace `<repo>` with the repository path.
 
 ### Memory budget
 
-At 256K context, q4_0 KV needs ~4.8 GB of VRAM (q8_0 would need ~8.6 GB, which does not fit a 24 GB card at 256K). Model weights, `mmproj`, and KV together use ~23 GB, leaving headroom on a 24 GB card. A smaller quant such as IQ2_S can reduce the footprint by ~3 GB.
+At 256K context, q4_0 KV needs ~4.8 GB of VRAM (q8_0 would need ~8.6 GB, which does not fit a 24 GB card at 256K). Model weights, `mmproj`, and KV together use ~23 GB, leaving headroom on a 24 GB card. A smaller quant such as IQ2_S can reduce the footprint by ~3 GB. The host-RAM prompt cache (`--cache-ram` / `-cram`, default 8192 MiB) is sized per recipe to hold about one full context: 6144 MiB for 256K q4_0 and 128K q8_0, and 10240 MiB for 256K q8_0.
 
 ## Benchmarks
 

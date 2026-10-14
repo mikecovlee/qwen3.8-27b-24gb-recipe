@@ -93,7 +93,8 @@ tmux new-session -d -s llm "pwsh -File <repo>\start-server-iq3s-q4kv-text-image-
 | 引擎 | llama.cpp b11491（CUDA 13.4） |
 | API | `http://0.0.0.0:8080`，别名 `qwen3.8-27b` |
 | 并行槽位 | 1（一个 256K 槽位；请求串行处理） |
-| 思考深度 | 服务端默认 `--reasoning-effort medium`；支持请求级 `reasoning_effort`（`low`/`medium`/`high`/`xhigh`/`none`）与 `reasoning_budget_tokens` |
+| 思考强度 | 默认 = 模板默认（effort `xhigh`、保留思考开启）；支持请求级 `reasoning_effort` / `chat_template_kwargs` 覆盖 |
+| 主机 prompt 缓存 | `-cram <MiB>` — 主机内存 prompt cache 上限（默认 8192；0=关，-1=不限；是上限而非预分配） |
 
 ### 配方 1 — IQ3_S
 
@@ -105,7 +106,7 @@ tmux new-session -d -s llm "pwsh -File <repo>\start-server-iq3s-q4kv-text-image-
 --alias qwen3.8-27b --parallel 1
 -ngl all -t 6 -ub 2048
 --spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-poll 1
---no-reasoning-preserve --reasoning-effort medium
+-cram 6144
 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --presence-penalty 0.0 --repeat-penalty 1.0
 --host 0.0.0.0 --port 8080
 ```
@@ -129,8 +130,8 @@ tmux new-session -d -s llm "pwsh -File <repo>\start-server-iq3s-q4kv-text-image-
 --cache-type-k q4_0 --cache-type-v q4_0
 --alias qwen3.8-27b --no-mmproj --parallel 1
 -ngl all -t 6 -ub 512
---spec-type draft-mtp --spec-draft-poll 1
---no-reasoning-preserve --reasoning-effort medium
+--spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-poll 1
+-cram 6144
 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --presence-penalty 0.0 --repeat-penalty 1.0
 --host 0.0.0.0 --port 8080
 ```
@@ -155,7 +156,7 @@ tmux new-session -d -s llm "pwsh -File <repo>\start-server-iq3s-q4kv-text-image-
 
 ### 显存预算
 
-256K 上下文下，q4_0 KV 约需 4.8GB 显存（q8_0 约需 8.6GB，在 24GB 卡上无法开到 256K）。模型权重、`mmproj` 与 KV 合计约 23GB，在 24GB 卡上仍有余量。换成更小的量化（如 IQ2_S）可再省约 3GB。
+256K 上下文下，q4_0 KV 约需 4.8GB 显存（q8_0 约需 8.6GB，在 24GB 卡上无法开到 256K）。模型权重、`mmproj` 与 KV 合计约 23GB，在 24GB 卡上仍有余量。换成更小的量化（如 IQ2_S）可再省约 3GB。 主机 prompt 缓存（`--cache-ram` / `-cram`，默认 8192 MiB）按配方设定为约 1× 完整上下文：256K q4_0 与 128K q8_0 用 6144 MiB，256K q8_0 用 10240 MiB。
 
 ## 基准测试
 
