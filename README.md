@@ -1,6 +1,6 @@
 # Qwen3.8-27B on a 24 GB GPU with llama.cpp
 
-A ready-to-run setup for serving **Qwen3.8-27B** locally on a single **24 GB NVIDIA GPU** with [llama.cpp](https://github.com/ggml-org/llama.cpp). Two recipes are provided — **IQ3_S-mtp** (with vision) and **UD-Q4_K_XL** — sharing the same engine (b11491, CUDA 13.4) and an OpenAI-compatible API. Each recipe ships install, start, and benchmark scripts. Only one recipe runs at a time: they share port 8080 and the GPU.
+A ready-to-run setup for serving **Qwen3.8-27B** locally on a single **24 GB NVIDIA GPU** with [llama.cpp](https://github.com/ggml-org/llama.cpp). Two recipes are provided — **IQ3_S-mtp** (with vision) and **UD-Q4_K_XL** — sharing the same engine (b12302, CUDA 13.5) and an OpenAI-compatible API. Each recipe ships install, start, and benchmark scripts. Only one recipe runs at a time: they share port 8080 and the GPU.
 
 > **中文版：[README-zh.md](README-zh.md)**
 
@@ -52,7 +52,7 @@ Both are `qwen35` **hybrid** models (65 blocks, only 16 attention layers via `fu
 .\install-udq4.ps1                 # engine + UD-Q4_K_XL
 ```
 
-Both installers download llama.cpp **b11491** (CUDA 13.4) and use a resumable, size-verified download loop, so an interrupted download can simply be re-run. Add `-Proxy <url>` if a proxy is required, or `-SkipModel` to install the engine only.
+Both installers download llama.cpp **b12302** (CUDA 13.5) and use a resumable, size-verified download loop, so an interrupted download can simply be re-run. Add `-Proxy <url>` if a proxy is required, or `-SkipModel` to install the engine only.
 
 ### 2. Start the server
 
@@ -90,7 +90,7 @@ Replace `<repo>` with the repository path.
 
 | Setting | Value |
 |---|---|
-| Engine | llama.cpp b11491 (CUDA 13.4) |
+| Engine | llama.cpp b12302 (CUDA 13.5) |
 | API | `http://0.0.0.0:8080`, alias `qwen3.8-27b` |
 | Parallel slots | 1 (a single 256K slot; requests are serialized) |
 | Reasoning | server default = the chat template default (effort `xhigh`, preserve-reasoning on); per-request `reasoning_effort` / `chat_template_kwargs` overrides are supported |
@@ -106,7 +106,7 @@ Replace `<repo>` with the repository path.
 --alias qwen3.8-27b --parallel 1
 -ngl all -t 6 -ub 2048
 --spec-type draft-mtp --spec-draft-n-max 3 --spec-draft-poll 1
--cram 6144
+-cram 12288
 --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --presence-penalty 0.0 --repeat-penalty 1.0
 --host 0.0.0.0 --port 8080
 ```
@@ -156,7 +156,7 @@ Replace `<repo>` with the repository path.
 
 ### Memory budget
 
-At 256K context, q4_0 KV needs ~4.8 GB of VRAM (q8_0 would need ~8.6 GB, which does not fit a 24 GB card at 256K). Model weights, `mmproj`, and KV together use ~23 GB, leaving headroom on a 24 GB card. A smaller quant such as IQ2_S can reduce the footprint by ~3 GB. The host-RAM prompt cache (`--cache-ram` / `-cram`, default 8192 MiB) is sized per recipe to hold about one full context: 6144 MiB for 256K q4_0 and 128K q8_0, and 10240 MiB for 256K q8_0.
+At 256K context, q4_0 KV needs ~4.8 GB of VRAM (q8_0 would need ~8.6 GB, which does not fit a 24 GB card at 256K). Model weights, `mmproj`, and KV together use ~23 GB, leaving headroom on a 24 GB card. A smaller quant such as IQ2_S can reduce the footprint by ~3 GB. The host-RAM prompt cache (`--cache-ram` / `-cram`, default 8192 MiB) is sized per recipe to stay within the host's 64 GB RAM: 12288 MiB for the 256K vision recipe, 6144 MiB for the 256K and 128K text-only recipes, and 10240 MiB for 256K q8_0.
 
 ## Benchmarks
 
@@ -200,8 +200,8 @@ Recipe 2 (UD-Q4_K_XL, `benchmark.ps1`):
 
 | Script | Recipe | Purpose |
 |---|---|---|
-| `install-iq3s.ps1` | 1 | engine b11491 + IQ3_S + mmproj (`-TextOnly` skips vision) |
-| `install-udq4.ps1` | 2 | engine b11491 + UD-Q4_K_XL |
+| `install-iq3s.ps1` | 1 | engine b12302 + IQ3_S + mmproj (`-TextOnly` skips vision) |
+| `install-udq4.ps1` | 2 | engine b12302 + UD-Q4_K_XL |
 | `start-server-iq3s-q4kv-text-image-256k.ps1` | 1 | q4_0 KV + vision, 256K, ub2048 |
 | `start-server-iq3s-q8kv-text-only-256k.ps1` | 1 | q8_0 KV, no vision, 256K, ub512 |
 | `start-server-udq4-q4kv-text-only-256k.ps1` | 2 | q4_0 KV, 256K, ub512 |

@@ -5,9 +5,9 @@
     Qwen3.8-27B IQ3_S-mtp 配方单卡一键安装脚本。
 
 .DESCRIPTION
-    Downloads llama.cpp (b11491, CUDA 13.4) and the ISTA-DASLab Qwen3.8-27B-GSQ-RCO
+    Downloads llama.cpp (b12302, CUDA 13.5) and the ISTA-DASLab Qwen3.8-27B-GSQ-RCO
     IQ3_S-mtp GGUF model, plus the matching vision projector (mmproj) unless -TextOnly.
-    下载 llama.cpp 引擎（b11491, CUDA 13.4）与 ISTA-DASLab IQ3_S-mtp 模型；默认同时下载视觉编码器
+    下载 llama.cpp 引擎（b12302, CUDA 13.5）与 ISTA-DASLab IQ3_S-mtp 模型；默认同时下载视觉编码器
     （mmproj），使用 -TextOnly 可跳过。
 
 .PARAMETER SkipModel
@@ -42,7 +42,7 @@ param(
     [switch]$TextOnly,
     [string]$Proxy = "",
     [switch]$Force,
-    [string]$LlamaCppUrl = "https://github.com/ggml-org/llama.cpp/releases/download/b11491/llama-b11491-bin-win-cuda-13.4-x64.zip",
+    [string]$LlamaCppUrl = "https://github.com/ggml-org/llama.cpp/releases/download/b12302/llama-b12302-bin-win-cuda-13.5-x64.zip",
     [string]$ModelUrl = "https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/resolve/main/Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf",
     [string]$MmprojUrl = "https://huggingface.co/ISTA-DASLab/Qwen3.8-27B-GSQ-RCO-GGUF/resolve/main/mmproj-Qwen3.8-27B-BF16.gguf"
 )
@@ -124,12 +124,12 @@ if ($TextOnly) {
 }
 
 # ---------- Step 2: download llama.cpp ----------
-Write-Step "Downloading llama.cpp (b11491, CUDA 13.4)..." "下载 llama.cpp 引擎（b11491, CUDA 13.4）..."
+Write-Step "Downloading llama.cpp (b12302, CUDA 13.5)..." "下载 llama.cpp 引擎（b12302, CUDA 13.5）..."
 New-Item -ItemType Directory -Path $llamaCppDir -Force | Out-Null
 if ((Test-Path $llamaServerExe) -and -not $Force) {
     Write-Info "llama-server.exe already exists, skipping. (use -Force to re-download)" "已存在 llama-server.exe，跳过（-Force 强制重下）"
 } else {
-    $zip = Join-Path $env:TEMP "llama-b11491-bin-win-cuda-13.4-x64.zip"
+    $zip = Join-Path $env:TEMP "llama-b12302-bin-win-cuda-13.5-x64.zip"
     $proxyArg = @(); if ($Proxy) { $proxyArg = @("-x", $Proxy) }
     & curl.exe @proxyArg -L -C - --http1.1 --retry 5 --retry-all-errors --fail -o $zip $LlamaCppUrl
     if ($LASTEXITCODE -ne 0) { Write-Error "llama.cpp download failed (exit $LASTEXITCODE). / 引擎下载失败。" }
